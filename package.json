@@ -12,7 +12,9 @@
     "catalog": "node scripts/gen-catalog.mjs",
     "catalog:check": "node scripts/gen-catalog.mjs --check",
     "smoke": "node scripts/smoke-install.mjs",
-    "test": "npm run lint && npm run catalog:check && npm run smoke"
+    "agents:sync": "node scripts/sync-agent-docs.mjs",
+    "agents:check": "node scripts/sync-agent-docs.mjs --check",
+    "test": "npm run lint && npm run catalog:check && npm run agents:check && npm run smoke"
   },
   "devDependencies": {
     "skills": "1.7.6",

@@ -39,5 +39,8 @@ jobs:
       - name: README catalog is up to date
         run: npm run catalog:check
 
+      - name: Agent instruction files match AGENTS.md
+        run: npm run agents:check
+
       - name: Smoke install for every agent target
         run: npm run smoke
