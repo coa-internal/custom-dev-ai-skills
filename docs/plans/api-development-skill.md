@@ -3,6 +3,8 @@
 **Goal:** a skill that helps coding agents create and maintain City of Asheville HTTP APIs the
 City's way: spec-first OpenAPI, TypeScript + Express on AWS Lambda behind API Gateway, deployed
 with Terraform.
+**Build status:** phases 1–2 done (starter template + CI job, `SKILL.md` + references). The skill
+stays `internal` until phase 3 (manual harness tests).
 **Status:** draft for review (2026-11-23). Decisions come from a Q&A with the dev team. There is no
 separate spike: the skill is validated when the first real API is built in another repo, and revised
 from what that build finds.
