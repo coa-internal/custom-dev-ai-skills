@@ -1,6 +1,6 @@
 # custom-dev-ai-skills
 
-The City of Asheville's central, private source of truth for **AI coding-agent skills**. City
+The City of Asheville's central, public source of truth for **AI coding-agent skills**. City
 repositories install skills from here at a pinned release tag, so every repo gets the same reviewed
 content and CI can detect drift. The skills work in **Claude Code**, **Gemini CLI / Antigravity**
 and **GitHub Copilot** (VS Code and the github.com coding agent).
@@ -51,4 +51,9 @@ N.C.G.S. §132. Never put PII, credentials, internal hostnames or privileged con
 Parts of this repo were drafted with AI assistance (Claude Code) and reviewed by City staff.
 Skill output is AI-generated and must be verified by the person using it.
 
-The design plan is in [docs/PLAN.md](docs/PLAN.md).
+The design plan is in [docs/PLAN.md](docs/PLAN.md). To report a security problem, see
+[SECURITY.md](SECURITY.md).
+
+## License
+
+Pending City review. Until a `LICENSE` file is added, no reuse rights are granted.

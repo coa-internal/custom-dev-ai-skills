@@ -13,3 +13,8 @@ for tag `vX.Y.Z`.
 - `git-pr-description` skill: drafts PR descriptions in the City PR template format.
 - `skill-template` (internal): annotated starter for new skills.
 - Docs: CONSUMING.md (including verified `skills@1.7.6` CLI behavior), AUTHORING.md, CONTRIBUTING.md.
+- SECURITY.md with private reporting instructions.
+
+### Changed
+- The repo is public. `verify-skills.yml` no longer needs a GitHub App or secrets, and callers drop
+  `secrets: inherit`.

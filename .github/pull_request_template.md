@@ -18,6 +18,7 @@
 - Scan results (if applicable):
 
 ## Review checklist
+- [ ] Public content check: no PII, credentials, internal hostnames/IPs, or sensitive internal procedures (this repo is public)
 - [ ] Plan reviewed and approved
 - [ ] Required reviews satisfied
 - [ ] Required checks satisfied
