@@ -1,0 +1,7 @@
+# terraform init -backend-config=backend/dev.s3.tfbackend
+# Ask the infrastructure-as-code team for the state bucket name. Do not guess it.
+bucket       = "<STATE_BUCKET>"
+key          = "terraform/<PROJECT_NAME>/dev/terraform.tfstate"
+region       = "us-east-1"
+use_lockfile = true
+encrypt      = true

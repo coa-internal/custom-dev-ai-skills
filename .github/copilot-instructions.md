@@ -55,7 +55,9 @@ bootstrap, checks and catalog regeneration were verified with Node 24.15.0/npm 1
   `scripts/smoke-install.mjs`: real CLI install and byte comparison.
 - `docs/AUTHORING.md`: authoritative authoring, safety, testing and semver rules.
   `docs/CONSUMING.md`: pinned installs, upgrades and consumer CI behavior.
-  `docs/PLAN.md` is a historical plan; prefer current workflows and docs when it conflicts.
+  `docs/plans/` holds design plans: `skills-repo-buildout.md` is historical, and plans for new skills
+  (e.g. `api-development-skill.md`) describe intent before building. Prefer current workflows, docs
+  and skill files when a plan conflicts with them.
 - `AGENTS.md` (this file) is the single source of agent instructions. `CLAUDE.md` and `GEMINI.md`
   only import it (`@AGENTS.md`). `.github/copilot-instructions.md` is a generated copy for Copilot
   code review: after editing this file, run `npm run agents:sync` and commit both. Never edit the
