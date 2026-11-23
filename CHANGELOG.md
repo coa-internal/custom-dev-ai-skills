@@ -6,6 +6,11 @@ for tag `vX.Y.Z`.
 
 ## [Unreleased]
 
+### Added
+- Agent instructions for working on this repo: `AGENTS.md`, imported by `CLAUDE.md` and
+  `GEMINI.md`, with a generated `.github/copilot-instructions.md` copy for Copilot code review.
+  `npm run agents:sync` regenerates the copy; CI runs `npm run agents:check` to keep them in sync.
+
 ## [0.1.0] - 2026-11-23
 
 First pre-release, for piloting in a single consuming repo before `1.0.0`.
