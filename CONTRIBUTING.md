@@ -4,8 +4,9 @@ Anyone at the City of Asheville can propose a new skill or a change. The dev tea
 
 ## Workflow
 
-1. Create a branch. Forking is disabled on this private repo, so ask the dev team for write access
-   if you don't have it.
+1. Create a branch (City staff with write access) or fork the repo. **This repo is public.** Anything
+   you push, including branches, commits and PR text, is visible to everyone immediately and can't
+   be fully deleted afterward.
 2. Add or change a skill under `skills/<name>/`. For a new one, copy
    [`skills/skill-template/`](skills/skill-template/SKILL.md), rename the folder and `name`, and
    delete the `internal: true` line.
@@ -28,7 +29,8 @@ Anyone at the City of Asheville can propose a new skill or a change. The dev tea
 
 ## Review checklist (for reviewers)
 
-- No PII, credentials, internal hostnames/IPs or privileged content. There is no automated scan yet.
+- No PII, credentials, internal hostnames/IPs, privileged content, or security-sensitive internal
+  procedures. GitHub secret scanning catches many credentials, but not the rest. Reviewers must check.
 - `description` clearly says when the skill should and shouldn't fire.
 - Works as plain markdown in the listed harnesses. Scripts are optional or cross-platform.
 - The semver bump in the changelog is right.

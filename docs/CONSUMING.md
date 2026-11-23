@@ -15,8 +15,7 @@ The `skills` CLI sends anonymous telemetry unless it is disabled. Turn it off in
 export DISABLE_TELEMETRY=1
 ```
 
-You need read access to this repo through your normal git credentials (`gh auth login`, an SSH key,
-or a credential helper). The CLI uses whatever git already uses.
+This repo is public, so no credentials are needed to install skills.
 
 ## First-time install
 
@@ -58,7 +57,6 @@ on: [pull_request]
 jobs:
   skills:
     uses: coa-internal/custom-dev-ai-skills/.github/workflows/verify-skills.yml@v1.0.0
-    secrets: inherit
 ```
 
 Make the **"Skills match lockfile"** check required in branch protection. It is a blocking job that:
@@ -74,10 +72,19 @@ Make the **"Skills match lockfile"** check required in branch protection. It is 
 A second job, **"Newer skills release available"**, is non-blocking. It posts a warning and a job
 summary when a newer release tag exists than the one you pinned.
 
-The workflow authenticates with an org-owned GitHub App (read-only `contents`, installed only on this
-repo). Org admins set up the `SKILLS_APP_CLIENT_ID` org variable and the `SKILLS_APP_PRIVATE_KEY` org
-secret once. `secrets: inherit` passes the secret through. If your repo can't see them, ask the dev
-team.
+The workflow needs no secrets. It fetches from this public repo anonymously.
+
+We also recommend adding the skill paths to your repo's CODEOWNERS so the dev team sees any change
+to them:
+
+```text
+/skills-lock.json  @coa-internal/coa-dev-team
+/.claude/skills/   @coa-internal/coa-dev-team
+/.agents/skills/   @coa-internal/coa-dev-team
+```
+
+`local-*` skills sit under the same folders, so this also routes them to the dev team. Narrow it to
+specific skill folders if that's too much review.
 
 ## Upgrading
 
@@ -136,5 +143,6 @@ Other observations:
 - Skills with `metadata.internal: true` are hidden from `--list` and from `--skill '*'`, but they
   **can** still be installed by naming them explicitly. Treat `internal` as "not advertised", not
   "blocked".
-- For private GitHub repos the CLI tries git credentials, then `gh`, then SSH. `GITHUB_TOKEN` and
-  `GH_TOKEN` are used for API lookups.
+- For private GitHub sources the CLI tries git credentials, then `gh`, then SSH. `GITHUB_TOKEN` and
+  `GH_TOKEN` are used for API lookups. This repo is public, so none of that applies, but it matters
+  if you install from a private source.

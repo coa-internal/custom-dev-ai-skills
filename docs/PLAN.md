@@ -8,7 +8,7 @@
 | Area | Decision |
 |---|---|
 | Distribution | Git source: `npx skills@1.7.6 add coa-internal/custom-dev-ai-skills#vX.Y.Z --skill <name> --copy`. No npm package. (Corrected in Phase 0: the ref goes after `#`. `@name` selects a skill.) |
-| Hosting | Private repo in the City GitHub org. |
+| Hosting | ~~Private repo~~ **Public** repo in the City GitHub org (changed 2026-11-23 to remove the need for a CI credential). |
 | Consumer commits | `skills-lock.json` **and** copied skill files (`--copy`), so cloud agents (Copilot coding agent, Claude on the web) can see them. |
 | Versioning | Repo-wide semver tags (`v1.0.0`) + `CHANGELOG.md`. |
 | Scope | Skills only (`SKILL.md` folders with optional `scripts/`, `references/`, `assets/`). No AGENTS.md, MCP, or plugin-marketplace sync for now. |
@@ -17,7 +17,7 @@
 | Central CI | Frontmatter/structure lint + install smoke test for all four agent targets. |
 | Propagation | Manual. Consumers upgrade by re-running `add` at a new tag. |
 | Consumer CI | **Blocking:** frozen-lockfile restore + `git diff --exit-code` (catches hand edits). **Non-blocking:** `skills check` posts a "newer release available" warning. |
-| CI auth | Org-owned GitHub App with read-only `contents` access to this repo. Short-lived tokens via `actions/create-github-app-token`. |
+| CI auth | None. The repo is public, so consumer CI fetches anonymously. (The GitHub App design was dropped.) |
 | Local skills | Allowed in consumers only with a `local-` prefix. Central skill names may never start with `local-`. |
 | Layout | Flat `skills/<name>/SKILL.md`. Group with name prefixes. README catalog is generated. |
 | Seed content | 1–2 reference skills only. |
@@ -106,5 +106,5 @@ Record the findings in `docs/CONSUMING.md`. If item 3 fails, write a small scrip
 - **Phase 0: done**, except the manual check that each harness loads skills (folded into the Phase 4 pilot). Findings are in [CONSUMING.md](CONSUMING.md#cli-behavior-notes-phase-0). Item 3 failed as anticipated: `skills check` does not see newer tags. The staleness job uses `git ls-remote --tags`. Item 4 differs from the plan: `experimental_install` restores only `.agents/skills/`. The drift check also `diff -r`s `.claude/skills/` against the restored copy.
 - **Phase 1: done in repo.** Org-admin settings still needed: `coa-dev-team` repo access (team created), branch protection and tag protection.
 - **Phase 2: done**: `skill-template` and `git-pr-description`. Manual harness testing is still pending.
-- **Phase 3: workflow and docs done.** Still needed: the GitHub App, org variable and secret, and the Actions access setting.
+- **Phase 3: workflow and docs done.** The repo is going public instead of using a GitHub App, so no credential setup is needed.
 - **Phases 4–5: not started.**

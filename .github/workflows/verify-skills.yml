@@ -9,11 +9,8 @@ name: Verify agent skills
 #   jobs:
 #     skills:
 #       uses: coa-internal/custom-dev-ai-skills/.github/workflows/verify-skills.yml@v1.0.0
-#       secrets: inherit
 #
-# Needs (set once by an org admin, see docs/CONSUMING.md):
-#   vars.SKILLS_APP_CLIENT_ID        org variable: client ID of the read-only GitHub App
-#   secrets.SKILLS_APP_PRIVATE_KEY   org secret:   private key of that App
+# No secrets needed: the central repo is public, so skills are fetched anonymously.
 #
 # Jobs:
 #   integrity  (blocking)      lockfile policy + frozen restore + drift check of committed copies
@@ -66,22 +63,6 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
 
-      - id: app-token
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
-        with:
-          client-id: ${{ vars.SKILLS_APP_CLIENT_ID }}
-          private-key: ${{ secrets.SKILLS_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: ${{ inputs.central-repo }}
-          permission-contents: read
-
-      - name: Authenticate git for the central skills repo only
-        env:
-          TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          git config --global url."https://x-access-token:${TOKEN}@github.com/${CENTRAL}".insteadOf "https://github.com/${CENTRAL}"
-          git config --global --add url."https://x-access-token:${TOKEN}@github.com/${CENTRAL}".insteadOf "git@github.com:${CENTRAL}"
-
       - id: policy
         name: Lockfile policy
         run: |
@@ -127,7 +108,6 @@ jobs:
 
       - name: Restore skills from lockfile (frozen)
         env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           CLI_VERSION: ${{ inputs.skills-cli-version }}
         run: |
           set -euo pipefail
@@ -183,24 +163,13 @@ jobs:
         with:
           persist-credentials: false
 
-      - id: app-token
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
-        with:
-          client-id: ${{ vars.SKILLS_APP_CLIENT_ID }}
-          private-key: ${{ secrets.SKILLS_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: ${{ inputs.central-repo }}
-          permission-contents: read
-
       - name: Compare pinned tags with the latest release
-        env:
-          TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           set -euo pipefail
           [ -f skills-lock.json ] || { echo "No skills-lock.json; nothing to check."; exit 0; }
           norm() { echo "$1" | sed -E 's#^(https://github\.com/|git@github\.com:)##; s#\.git$##' | tr '[:upper:]' '[:lower:]'; }
           central=$(norm "$CENTRAL")
-          latest=$(git ls-remote --tags --refs "https://x-access-token:${TOKEN}@github.com/${CENTRAL}.git" 'v*' \
+          latest=$(git ls-remote --tags --refs "https://github.com/${CENTRAL}.git" 'v*' \
             | sed -E 's#.*refs/tags/##' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1 || true)
           if [ -z "$latest" ]; then echo "No release tags found in ${CENTRAL}."; exit 0; fi
 

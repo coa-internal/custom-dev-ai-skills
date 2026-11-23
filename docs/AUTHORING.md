@@ -58,8 +58,10 @@ metadata:
 ## Safety and records
 
 - No PII about residents or employees, credentials, tokens, internal hostnames or IP addresses,
-  privileged or confidential content. There is no automated secrets scan yet, so reviewers check
-  this by hand.
+  privileged or confidential content. **This repo is public.** GitHub secret scanning and push
+  protection catch many credentials, but reviewers must check everything else by hand. Keep
+  security-sensitive procedures (deployment, access, incident response) in a `local-` skill in a
+  private repo instead.
 - Skills and their installed copies may be **public records** (N.C.G.S. §132). Write accordingly.
 - Skills must not tell agents to make final decisions about people (eligibility, enforcement,
   benefits), give legal advice, or hide that AI was used. Where it matters, include a reminder that
