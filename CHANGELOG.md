@@ -6,6 +6,8 @@ for tag `vX.Y.Z`.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-23
+
 ### Added
 - `api-development` skill (**minor**): builds and maintains City HTTP APIs (spec-first OpenAPI 3.0,
   TypeScript + Express on Lambda behind an API Gateway HTTP API, Terraform). Includes a tested
