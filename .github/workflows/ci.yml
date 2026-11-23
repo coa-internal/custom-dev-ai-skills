@@ -44,3 +44,43 @@ jobs:
 
       - name: Smoke install for every agent target
         run: npm run smoke
+
+  api-starter:
+    name: API starter builds and passes its checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      STARTER: ${{ github.workspace }}/skills/api-development/assets/starter
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Work on a copy, the way an agent would use the template.
+      - name: Copy starter to a scratch directory
+        run: cp -R "$STARTER" "$RUNNER_TEMP/starter"
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: skills/api-development/assets/starter/.nvmrc
+          cache: npm
+          cache-dependency-path: skills/api-development/assets/starter/package-lock.json
+
+      - name: Install, check (spec lint, generated types, typecheck, tests) and package
+        working-directory: ${{ runner.temp }}/starter
+        run: |
+          npm ci --ignore-scripts
+          npm run check
+          npm run package
+          unzip -l lambda.zip run.sh dist/server.js openapi.yaml
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: "~1.14"
+
+      - name: Terraform format and validate
+        working-directory: ${{ runner.temp }}/starter/infra
+        run: |
+          terraform fmt -check -recursive
+          terraform init -backend=false -input=false
+          terraform validate

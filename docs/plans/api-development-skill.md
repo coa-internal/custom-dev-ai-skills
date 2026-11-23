@@ -13,7 +13,7 @@ from what that build finds.
 | Area | Decision |
 |---|---|
 | Language / framework | TypeScript on Node.js, **Express** |
-| Runtime | Latest Node LTS that Lambda supports at build time. The skill tells agents to check AWS's runtime list, not hard-code a version. |
+| Runtime | Latest Node LTS that Lambda supports at build time. The skill tells agents to check AWS's runtime list, not hard-code a version. *(Built: `nodejs26.x`; TypeScript 5.9, because `openapi-typescript` doesn't support TypeScript 7 yet.)* |
 | Design workflow | **Spec-first.** The OpenAPI file is the contract, reviewed in PRs before code. |
 | OpenAPI version | **3.0.x.** API Gateway HTTP APIs import 3.0 natively. |
 | Contract enforcement | **Both:** `openapi-typescript` generates handler types, and `express-openapi-validator` validates requests at runtime (responses in tests). |
@@ -136,7 +136,9 @@ Minimal but working. Every file is something a real API needs.
 - `openapi.yaml`: `/v1/health`, one example resource with a cursor-paginated list, Problem Details
   error schema, snake_case fields, servers placeholder.
 - `src/app.ts`: Express app, `express-openapi-validator`, JSON logger with request ID, Problem
-  Details error handler, CORS allowlist from config, security headers.
+  Details error handler, security headers. *(Built: CORS moved to the API Gateway
+  `cors_configuration`, because preflight `OPTIONS` requests never reach the app when routes are
+  imported from the spec.)*
 - `src/server.ts`: `listen()` entry used both locally and by Lambda Web Adapter.
 - `src/generated/`: committed output of `openapi-typescript`. A `gen:types:check` script (run in CI)
   fails when it doesn't match the spec.

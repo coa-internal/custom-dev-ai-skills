@@ -1,0 +1,3 @@
+# Spectral's built-in OpenAPI ruleset. City conventions (snake_case fields, kebab-case paths,
+# /v1 prefixes, Problem Details errors) are checked in review; see the api-development skill.
+extends: ["spectral:oas"]

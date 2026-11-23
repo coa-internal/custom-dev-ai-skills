@@ -1,0 +1,81 @@
+name: API CI
+
+# If the API lives in a subfolder of a larger repo, move this file to the repo's
+# .github/workflows/ and set API_DIR below (e.g. "services/permits-api").
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  API_DIR: "."
+
+jobs:
+  check:
+    name: Spec, types, tests and breaking changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ${{ env.API_DIR }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: ${{ env.API_DIR }}/.nvmrc
+          cache: npm
+          cache-dependency-path: ${{ env.API_DIR }}/package-lock.json
+
+      - run: npm ci --ignore-scripts
+
+      - name: Spec lint, generated types, typecheck, unit + contract tests
+        run: npm run check
+
+      - run: npm run build
+
+      - name: Get the base branch's spec
+        id: base
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if git show "origin/${BASE_REF}:./openapi.yaml" > "${GITHUB_WORKSPACE}/.oasdiff-base.yaml" 2>/dev/null; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No openapi.yaml on ${BASE_REF}; skipping the breaking-change check."
+          fi
+
+      - name: No breaking changes within this major version
+        if: steps.base.outputs.found == 'true'
+        uses: oasdiff/oasdiff-action/breaking@8a211b41745fcecdfa4a86531ffbf08934fb14f6 # v0.1.23
+        with:
+          base: .oasdiff-base.yaml
+          revision: ${{ env.API_DIR }}/openapi.yaml
+          fail-on: ERR
+
+  terraform:
+    name: Terraform format and validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: ${{ env.API_DIR }}/infra
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: "~1.14"
+
+      - run: terraform fmt -check -recursive
+      - run: terraform init -backend=false -input=false
+      - run: terraform validate
