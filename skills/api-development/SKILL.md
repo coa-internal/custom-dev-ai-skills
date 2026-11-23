@@ -3,8 +3,6 @@ name: api-development
 description: Builds and maintains City of Asheville HTTP APIs the City's way - spec-first OpenAPI 3.0, TypeScript + Express on AWS Lambda behind API Gateway HTTP APIs, deployed with Terraform. Use when creating a new API or service endpoint, adding or changing endpoints, editing or reviewing an OpenAPI spec, reviewing an API for security or conventions, versioning or deprecating an API, or bringing an existing API up to City standards.
 metadata:
   compatibility: claude-code, gemini-cli, antigravity, github-copilot
-  # Remove `internal` after manual testing in each harness listed above (see docs/AUTHORING.md).
-  internal: true
 ---
 
 # API development (City of Asheville)

@@ -3,8 +3,9 @@
 **Goal:** a skill that helps coding agents create and maintain City of Asheville HTTP APIs the
 City's way: spec-first OpenAPI, TypeScript + Express on AWS Lambda behind API Gateway, deployed
 with Terraform.
-**Build status:** phases 1–2 done (starter template + CI job, `SKILL.md` + references). The skill
-stays `internal` until phase 3 (manual harness tests).
+**Build status:** phases 1–3 done (starter template + CI job, `SKILL.md` + references, and manual
+phase-3 harness tests). The skill is public in this PR after passing the four-scenario matrix in
+every listed harness.
 **Status:** draft for review (2026-11-23). Decisions come from a Q&A with the dev team. There is no
 separate spike: the skill is validated when the first real API is built in another repo, and revised
 from what that build finds.
@@ -163,10 +164,39 @@ Minimal but working. Every file is something a real API needs.
 
 - `npm run lint`, the catalog and the smoke install cover the skill's structure. The starter ships
   as files, so the smoke test checks it is copied byte-for-byte.
-- **New CI job (proposed):** install the starter's dependencies, then run its spec lint, type
+- **CI job:** install the starter's dependencies, then run its spec lint, type
   generation, `tsc`, Vitest and `terraform validate` (no deploy). This catches template rot.
-- **Manual:** in each harness, ask for (1) a new API, (2) a new endpoint on it, (3) a review of a
-  deliberately flawed spec, (4) a breaking change. Record results in the PR.
+- **Manual:** in each listed harness, run the four prompts below in a clean test repository. Record
+  the results in the PR and remove `metadata.internal: true` only after every listed harness passes.
+
+### Phase 3 harness matrix
+
+Run these prompts with the `api-development` skill explicitly installed or enabled:
+
+1. **New API:** "Create a small public HTTP API using the City of Asheville API conventions. Ask only
+   the questions needed before scaffolding, start from the starter, and do not invent AWS resource
+   names or placeholders."
+2. **New endpoint:** "Add a cursor-paginated `GET` endpoint for widgets to this API. Change the
+   OpenAPI contract first, keep it additive, and run the relevant checks."
+3. **Review:** "Review this deliberately flawed OpenAPI spec for City conventions and security
+   issues. Report blocker, should-fix and suggestion findings with locations and concrete fixes.
+   Do not edit the spec unless I ask."
+4. **Breaking change:** "Change `/v1/widgets/{id}` so its `id` parameter and JSON field names no
+   longer fit the City conventions. Classify the change and propose the version/deprecation path
+   instead of silently breaking `/v1`."
+
+For each scenario, verify that the harness: fires the skill for the prompt, uses spec-first
+behavior, asks instead of guessing required project/AWS information, follows City naming and error
+conventions, and links or identifies the relevant reference material. A passing run requires no
+unsafe, invented or contradictory instructions. Record per-harness pass/fail, material corrections,
+and follow-up issues. Automated smoke-test success does not replace this matrix.
+
+| Harness | Status | Evidence |
+|---|---|---|
+| `github-copilot` | Passed | Four scenarios passed: new API, additive endpoint, spec review and breaking-change classification. |
+| `claude-code` | Passed | Four scenarios passed: new API, additive endpoint, spec review and breaking-change classification. |
+| `gemini-cli` | Passed | Four scenarios passed: new API, additive endpoint, spec review and breaking-change classification. |
+| `antigravity` | Passed | Four scenarios passed: new API, additive endpoint, spec review and breaking-change classification. |
 
 ## Phases
 
