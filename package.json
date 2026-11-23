@@ -1,0 +1,21 @@
+{
+  "name": "custom-dev-ai-skills",
+  "version": "0.0.0",
+  "private": true,
+  "description": "City of Asheville central source of AI coding-agent skills. Not published to npm; consumers install skills from git tags.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.20.0"
+  },
+  "scripts": {
+    "lint": "node scripts/lint-skills.mjs",
+    "catalog": "node scripts/gen-catalog.mjs",
+    "catalog:check": "node scripts/gen-catalog.mjs --check",
+    "smoke": "node scripts/smoke-install.mjs",
+    "test": "npm run lint && npm run catalog:check && npm run smoke"
+  },
+  "devDependencies": {
+    "skills": "1.7.6",
+    "yaml": "2.9.1"
+  }
+}
