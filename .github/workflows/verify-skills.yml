@@ -1,0 +1,228 @@
+name: Verify agent skills
+
+# Reusable workflow for repositories that install skills from this repo.
+#
+# Caller (in the consuming repo, e.g. .github/workflows/skills.yml):
+#
+#   name: Agent skills
+#   on: [pull_request]
+#   jobs:
+#     skills:
+#       uses: coa-internal/custom-dev-ai-skills/.github/workflows/verify-skills.yml@v1.0.0
+#       secrets: inherit
+#
+# Needs (set once by an org admin, see docs/CONSUMING.md):
+#   vars.SKILLS_APP_CLIENT_ID        org variable: client ID of the read-only GitHub App
+#   secrets.SKILLS_APP_PRIVATE_KEY   org secret:   private key of that App
+#
+# Jobs:
+#   integrity  (blocking)      lockfile policy + frozen restore + drift check of committed copies
+#   staleness  (non-blocking)  warns when a newer release tag exists than the one pinned
+
+on:
+  workflow_call:
+    inputs:
+      skills-cli-version:
+        description: Pinned version of the `skills` CLI. Bump deliberately.
+        type: string
+        default: "1.7.6"
+      node-version:
+        description: Node.js version (the CLI needs >= 22.20).
+        type: string
+        default: "22.x"
+      central-repo:
+        description: Name of the central skills repo in the caller's org.
+        type: string
+        default: custom-dev-ai-skills
+      working-directory:
+        description: Directory containing skills-lock.json.
+        type: string
+        default: "."
+
+permissions:
+  contents: read
+
+env:
+  DISABLE_TELEMETRY: "1"
+  NO_COLOR: "1"
+
+jobs:
+  integrity:
+    name: Skills match lockfile
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ inputs.working-directory }}
+    env:
+      CENTRAL: ${{ github.repository_owner }}/${{ inputs.central-repo }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.SKILLS_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SKILLS_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ inputs.central-repo }}
+          permission-contents: read
+
+      - name: Authenticate git for the central skills repo only
+        env:
+          TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          git config --global url."https://x-access-token:${TOKEN}@github.com/${CENTRAL}".insteadOf "https://github.com/${CENTRAL}"
+          git config --global --add url."https://x-access-token:${TOKEN}@github.com/${CENTRAL}".insteadOf "git@github.com:${CENTRAL}"
+
+      - id: policy
+        name: Lockfile policy
+        run: |
+          set -euo pipefail
+          fail=0
+          err() { echo "::error::$*"; echo "- $*" >> "$GITHUB_STEP_SUMMARY"; fail=1; }
+          norm() { echo "$1" | sed -E 's#^(https://github\.com/|git@github\.com:)##; s#\.git$##' | tr '[:upper:]' '[:lower:]'; }
+          central=$(norm "$CENTRAL")
+
+          if [ ! -f skills-lock.json ]; then
+            err "skills-lock.json not found in '${PWD}'. Install skills with 'npx skills add' (see docs/CONSUMING.md in ${CENTRAL})."
+            exit 1
+          fi
+
+          # Every lock entry from the central repo must be pinned to a release tag; no entry may use local-.
+          while IFS=$'\t' read -r name source ref; do
+            case "$name" in local-*) err "skills-lock.json: '$name' uses the reserved local- prefix; local skills must not be in the lockfile." ;; esac
+            if [ "$(norm "$source")" = "$central" ] && ! [[ "$ref" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              err "skills-lock.json: '$name' is not pinned to a release tag (ref='${ref:-<none>}'). Re-run: npx skills add ${CENTRAL}#vX.Y.Z --skill $name ..."
+            fi
+          done < <(jq -r '.skills | to_entries[] | [.key, (.value.sourceUrl // .value.source // ""), (.value.ref // "")] | @tsv' skills-lock.json)
+
+          # Every skill folder in the repo must be in the lockfile, or be a local- skill.
+          for dir in .agents/skills .claude/skills; do
+            [ -d "$dir" ] || continue
+            for path in "$dir"/*/; do
+              [ -d "$path" ] || continue
+              name=$(basename "$path")
+              case "$name" in local-*) continue ;; esac
+              if ! jq -e --arg n "$name" '.skills | has($n)' skills-lock.json > /dev/null; then
+                err "$dir/$name is not in skills-lock.json. Central skills must be installed with 'npx skills add'; repo-specific skills must be named local-*."
+              fi
+            done
+          done
+
+          # Every locked skill must be committed somewhere a harness (and cloud agents) can read it.
+          for name in $(jq -r '.skills | keys[]' skills-lock.json); do
+            if [ -z "$(git ls-files -- ".agents/skills/$name" ".claude/skills/$name")" ]; then
+              err "'$name' is in skills-lock.json but its files are not committed under .agents/skills/ or .claude/skills/ (install with --copy and commit them)."
+            fi
+          done
+          exit $fail
+
+      - name: Restore skills from lockfile (frozen)
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          CLI_VERSION: ${{ inputs.skills-cli-version }}
+        run: |
+          set -euo pipefail
+          # Remove only the locked skills so the restore rewrites them from the pinned source.
+          for name in $(jq -r '.skills | keys[]' skills-lock.json); do rm -rf ".agents/skills/$name"; done
+          npx --yes "skills@${CLI_VERSION}" experimental_install --frozen-lockfile
+
+      - name: Committed copies match the restored skills
+        run: |
+          set -uo pipefail
+          fail=0
+          err() { echo "::error::$*"; echo "- $*" >> "$GITHUB_STEP_SUMMARY"; fail=1; }
+          echo "### Skill drift check" >> "$GITHUB_STEP_SUMMARY"
+          for name in $(jq -r '.skills | keys[]' skills-lock.json); do
+            if [ -n "$(git ls-files -- ".agents/skills/$name")" ]; then
+              # Tracked copy: any modified, deleted or extra file is drift.
+              changes=$(git status --porcelain --untracked-files=all -- ".agents/skills/$name")
+              if [ -n "$changes" ]; then
+                err ".agents/skills/$name differs from the locked release:"
+                echo "$changes"; git --no-pager diff --stat -- ".agents/skills/$name"
+              fi
+            fi
+            if [ -n "$(git ls-files -- ".claude/skills/$name")" ]; then
+              if ! diff -r ".agents/skills/$name" ".claude/skills/$name"; then
+                err ".claude/skills/$name differs from the locked release."
+              fi
+            fi
+          done
+          if [ $fail -ne 0 ]; then
+            {
+              echo
+              echo "Central skills must not be edited by hand. To change a skill, open a PR in ${CENTRAL}."
+              echo "To reset, re-run the 'npx skills add ${CENTRAL}#<tag> ...' command from docs/CONSUMING.md and commit the result."
+              echo "For repo-specific behavior, create a separate skill named local-<name>."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "All locked skills match their pinned release. ✓" >> "$GITHUB_STEP_SUMMARY"
+
+  staleness:
+    name: Newer skills release available
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ inputs.working-directory }}
+    env:
+      CENTRAL: ${{ github.repository_owner }}/${{ inputs.central-repo }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.SKILLS_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SKILLS_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ inputs.central-repo }}
+          permission-contents: read
+
+      - name: Compare pinned tags with the latest release
+        env:
+          TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          [ -f skills-lock.json ] || { echo "No skills-lock.json; nothing to check."; exit 0; }
+          norm() { echo "$1" | sed -E 's#^(https://github\.com/|git@github\.com:)##; s#\.git$##' | tr '[:upper:]' '[:lower:]'; }
+          central=$(norm "$CENTRAL")
+          latest=$(git ls-remote --tags --refs "https://x-access-token:${TOKEN}@github.com/${CENTRAL}.git" 'v*' \
+            | sed -E 's#.*refs/tags/##' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1 || true)
+          if [ -z "$latest" ]; then echo "No release tags found in ${CENTRAL}."; exit 0; fi
+
+          outdated=""
+          while IFS=$'\t' read -r name source ref; do
+            [ "$(norm "$source")" = "$central" ] || continue
+            if [ "$ref" != "$latest" ] && [ "$(printf '%s\n%s\n' "$ref" "$latest" | sort -V | tail -n1)" = "$latest" ]; then
+              outdated+="| \`$name\` | \`$ref\` |"$'\n'
+            fi
+          done < <(jq -r '.skills | to_entries[] | [.key, (.value.sourceUrl // .value.source // ""), (.value.ref // "")] | @tsv' skills-lock.json)
+
+          if [ -n "$outdated" ]; then
+            echo "::warning title=Agent skills out of date::A newer release of ${CENTRAL} is available (${latest}). See the job summary to upgrade."
+            {
+              echo "### Agent skills: ${latest} is available"
+              echo
+              echo "| Skill | Pinned |"
+              echo "|---|---|"
+              printf '%s' "$outdated"
+              echo
+              echo "Read the CHANGELOG in ${CENTRAL}, then re-run your install command with \`#${latest}\` and commit the result."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "All central skills are pinned to the latest release (${latest})." >> "$GITHUB_STEP_SUMMARY"
+          fi
