@@ -103,7 +103,7 @@ Record the findings in `docs/CONSUMING.md`. If item 3 fails, write a small scrip
 
 ## Status (2026-11-23)
 
-- **Phase 0: done**, except the manual check that each harness loads skills (folded into the Phase 4 pilot). Findings are in [CONSUMING.md](CONSUMING.md#cli-behavior-notes-phase-0). Item 3 failed as anticipated: `skills check` does not see newer tags. The staleness job uses `git ls-remote --tags`. Item 4 differs from the plan: `experimental_install` restores only `.agents/skills/`. The drift check also `diff -r`s `.claude/skills/` against the restored copy.
+- **Phase 0: done**, except the manual check that each harness loads skills (folded into the Phase 4 pilot). Findings are in [CONSUMING.md](../CONSUMING.md#cli-behavior-notes-phase-0). Item 3 failed as anticipated: `skills check` does not see newer tags. The staleness job uses `git ls-remote --tags`. Item 4 differs from the plan: `experimental_install` restores only `.agents/skills/`. The drift check also `diff -r`s `.claude/skills/` against the restored copy.
 - **Phase 1: done in repo.** Org-admin settings still needed: `coa-dev-team` repo access (team created), branch protection and tag protection.
 - **Phase 2: done**: `skill-template` and `git-pr-description`. Manual harness testing is still pending.
 - **Phase 3: workflow and docs done.** The repo is going public instead of using a GitHub App, so no credential setup is needed.

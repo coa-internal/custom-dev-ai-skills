@@ -51,7 +51,8 @@ N.C.G.S. §132. Never put PII, credentials, internal hostnames or privileged con
 Parts of this repo were drafted with AI assistance (Claude Code) and reviewed by City staff.
 Skill output is AI-generated and must be verified by the person using it.
 
-The design plan is in [docs/PLAN.md](docs/PLAN.md). To report a security problem, see
+Design plans are in [docs/plans/](docs/plans/), starting with the original
+[repo buildout plan](docs/plans/skills-repo-buildout.md). To report a security problem, see
 [SECURITY.md](SECURITY.md).
 
 ## License
