@@ -67,6 +67,18 @@ metadata:
   benefits), give legal advice, or hide that AI was used. Where it matters, include a reminder that
   output must be verified by a person.
 
+## Standards (`dev-standards`)
+
+- One file per area in `skills/dev-standards/references/`. Each rule is a level-3 heading
+  `### <PREFIX>-<NNN> (MUST|SHOULD) <one-line summary>` followed by its full text. The digest script
+  reads only these headings, so keep the summary meaningful on its own.
+- IDs are permanent. Rewording is fine; changing what a rule requires is a new rule. A removed rule
+  moves to a **Retired rules** list at the end of its file, and its ID is never reused.
+- Every standard has an ADR in `docs/adr/` with the reasoning. Change both in the same pull request.
+- Other skills cite rules by ID and skill name (`GIT-002 in dev-standards`), not by link, because
+  links must stay inside the skill folder.
+- Versioning for standards is in `skills/dev-standards/references/deviations.md`.
+
 ## Versioning (semver, repo-wide)
 
 One version covers the whole repo. Tags look like `vX.Y.Z`. Each release needs a `CHANGELOG.md`

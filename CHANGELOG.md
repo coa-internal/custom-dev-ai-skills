@@ -6,6 +6,15 @@ for tag `vX.Y.Z`.
 
 ## [Unreleased]
 
+### Added
+- `dev-standards` skill (**minor**): City development standards as numbered MUST/SHOULD rules for
+  git workflow and releases (GIT-), web accessibility (A11Y-) and file formatting (FMT-), with the
+  baseline `.editorconfig` and Prettier config, `scripts/agents-digest.mjs` (writes a rule digest
+  into a repository's `AGENTS.md`) and `scripts/check-formatting.mjs`.
+- `git-workflow`, `git-release` and `web-accessibility` skills (**minor**): step-by-step guidance
+  that cites the `dev-standards` rules.
+- `docs/adr/`: ADRs 0001 to 0004 explaining the standards, and `docs/plans/standards-buildout.md`.
+
 ## [0.2.0] - 2026-11-23
 
 ### Added

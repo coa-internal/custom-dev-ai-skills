@@ -7,10 +7,11 @@ Trust these instructions; search the repository only when they are incomplete or
 ## What this repository is
 
 This small, public repository publishes portable AI coding-agent skills for City of Asheville
-repositories. Consumers copy skills from pinned Git tags, not an npm package. Skills are Markdown
-with YAML frontmatter; the validation tools are Node.js ES modules. Supported targets are
-`claude-code`, `gemini-cli`, `antigravity`, and `github-copilot`. One repo-wide semantic version
-applies to skills and the reusable workflow.
+repositories. It also publishes the City's development standards as numbered rules in the
+`dev-standards` skill, with the reasoning in `docs/adr/`. Consumers copy skills from pinned Git tags,
+not an npm package. Skills are Markdown with YAML frontmatter; the validation tools are Node.js ES
+modules. Supported targets are `claude-code`, `gemini-cli`, `antigravity`, and `github-copilot`. One
+repo-wide semantic version applies to skills and the reusable workflow.
 
 ## Setup and validation
 
@@ -50,6 +51,10 @@ bootstrap, checks and catalog regeneration were verified with Node 24.15.0/npm 1
 - `skills/<name>/SKILL.md`: skill instructions and frontmatter; optional `references/`, `scripts/`,
   and `assets/` travel with that skill. `skills/skill-template/` is an internal annotated starter;
   `skills/git-pr-description/` is the published example.
+- `skills/dev-standards/references/*.md`: the standards. Each rule is a heading
+  `### <ID> (MUST|SHOULD) <summary>`; IDs are permanent and never reused. A rule change also updates
+  the ADR in `docs/adr/` that explains it. `docs/adr/`: reasoning for City-wide standards (read by
+  people; not installed).
 - `scripts/lib/skills.mjs`: discovery, YAML parsing, shared limits and harness list.
   `scripts/lint-skills.mjs`: validation; `scripts/gen-catalog.mjs`: README catalog;
   `scripts/smoke-install.mjs`: real CLI install and byte comparison.
@@ -85,6 +90,10 @@ bootstrap, checks and catalog regeneration were verified with Node 24.15.0/npm 1
 - For skill changes, add an `Unreleased` changelog entry and identify the semver impact: removal,
   rename or breaking interfaces are major; new skills or trigger changes are minor; compatible
   wording and fixes are patch. Follow `docs/AUTHORING.md` for workflow changes and release details.
+- Standards changes follow the semver table in `skills/dev-standards/references/deviations.md`: a
+  new or tightened MUST rule, or a removed rule, is major.
+- Merge method (GIT-007): pull requests are squash-merged, so the pull request title becomes the
+  commit message on `main`.
 - This repository and PR content are public and may be public records. Never include PII,
   credentials, internal hostnames/IPs, privileged content or sensitive procedures. Disclose AI
   assistance in the PR and verify generated claims; use the PR template and do not invent evidence.

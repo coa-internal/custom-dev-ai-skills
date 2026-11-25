@@ -1,0 +1,30 @@
+# City of Asheville baseline (dev-standards FMT-001). Keep everything above the end marker
+# unchanged. Add repo-specific sections below it.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = tab
+tab_width = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# YAML does not allow tab indentation.
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# Match the canonical formatters for these languages (FMT-005).
+[*.py]
+indent_style = space
+indent_size = 4
+
+[*.{tf,tfvars,hcl}]
+indent_style = space
+indent_size = 2
+
+# Two trailing spaces are a line break in Markdown.
+[*.md]
+trim_trailing_whitespace = false
+# --- end of City baseline ---

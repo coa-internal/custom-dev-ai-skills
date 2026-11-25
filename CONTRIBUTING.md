@@ -10,6 +10,10 @@ Anyone at the City of Asheville can propose a new skill or a change. The dev tea
 2. Add or change a skill under `skills/<name>/`. For a new one, copy
    [`skills/skill-template/`](skills/skill-template/SKILL.md), rename the folder and `name`, and
    delete the `internal: true` line.
+
+   To change a standard, edit the rule in `skills/dev-standards/references/` and the ADR in
+   `docs/adr/` that explains it, in the same pull request.
+
 3. Follow [docs/AUTHORING.md](docs/AUTHORING.md): frontmatter rules, portability and safety.
 4. Run the checks locally (Node.js ≥ 22.20):
 
@@ -34,6 +38,8 @@ Anyone at the City of Asheville can propose a new skill or a change. The dev tea
 - `description` clearly says when the skill should and shouldn't fire.
 - Works as plain markdown in the listed harnesses. Scripts are optional or cross-platform.
 - The semver bump in the changelog is right.
+- For standards changes: the rule ID is new or unchanged in meaning, the ADR is updated, and the
+  semver bump follows `skills/dev-standards/references/deviations.md`.
 
 ## Notes
 
