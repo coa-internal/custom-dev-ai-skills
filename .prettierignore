@@ -1,0 +1,6 @@
+node_modules/
+**/package-lock.json
+
+# Generated (FMT-004)
+.github/copilot-instructions.md
+skills/api-development/assets/starter/src/generated/
