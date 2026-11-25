@@ -1,7 +1,7 @@
 # custom-dev-ai-skills
 
-The City of Asheville's central, public source of truth for **AI coding-agent skills**. City
-repositories install skills from here at a pinned release tag, so every repo gets the same reviewed
+The City of Asheville's central, public source of truth for **AI coding-agent skills** and the
+**City development standards** they carry. City repositories install skills from here at a pinned release tag, so every repo gets the same reviewed
 content and CI can detect drift. The skills work in **Claude Code**, **Gemini CLI / Antigravity**
 and **GitHub Copilot** (VS Code and the github.com coding agent).
 
@@ -29,8 +29,21 @@ Then add the CI check. See **[docs/CONSUMING.md](docs/CONSUMING.md)** for upgrad
 | Skill | Description | Compatibility |
 |---|---|---|
 | [`api-development`](skills/api-development/SKILL.md) | Builds and maintains City of Asheville HTTP APIs the City's way - spec-first OpenAPI 3.0, TypeScript + Express on AWS Lambda behind API Gateway HTTP APIs, deployed with Terraform. Use when creating a new API or service endpoint, adding or changing endpoints, editing or reviewing an OpenAPI spec, reviewing an API for security or conventions, versioning or deprecating an API, or bringing an existing API up to City standards. | claude-code, gemini-cli, antigravity, github-copilot |
+| [`dev-standards`](skills/dev-standards/SKILL.md) | City of Asheville software development standards - numbered MUST and SHOULD rules for git workflow and releases (GIT-), web accessibility (A11Y-) and file formatting (FMT-), with the baseline .editorconfig and Prettier config and a script that writes a one-line-per-rule digest into AGENTS.md. Use when checking whether a change, plan or repository follows City standards, when a rule ID such as GIT-010 or A11Y-006 comes up, when a project wants to deviate from a standard or needs a waiver, when setting up or fixing formatting in a repository, or when adding or updating the standards digest in AGENTS.md. | claude-code, gemini-cli, antigravity, github-copilot |
 | [`git-pr-description`](skills/git-pr-description/SKILL.md) | Drafts a pull request description in the City of Asheville PR format (Plan, Evidence, Review checklist) from the current branch's changes. Use when the user asks to write, draft, fill in or update a PR description, PR body or pull request summary, or is about to open a pull request. | claude-code, gemini-cli, antigravity, github-copilot |
+| [`git-release`](skills/git-release/SKILL.md) | Prepares City of Asheville releases - choosing the next semantic version, drafting release notes from the changes since the last tag, preparing the release tag for a release maintainer, shipping a hotfix, and rolling back to a previous release. Use when the user wants to cut, tag, version or promote a release, deploy to production, draft release notes or a changelog section, ship an urgent fix to production, or roll back a bad release. For everyday branching and pull requests use git-workflow instead. | claude-code, gemini-cli, antigravity, github-copilot |
+| [`git-workflow`](skills/git-workflow/SKILL.md) | Walks through the City of Asheville git workflow - starting a feature, hotfix or epic branch from main, committing in small reviewable steps, keeping epic branches in sync with main, sizing and opening pull requests, and merging. Use when the user starts new work, asks which branch to use or how to name it, plans a feature that needs several pull requests, needs to sync an epic branch, is about to open or merge a pull request, or asks how branching works in a City repository. For releases, tags and hotfix promotion use git-release instead. | claude-code, gemini-cli, antigravity, github-copilot |
+| [`web-accessibility`](skills/web-accessibility/SKILL.md) | Builds, tests and reviews City of Asheville web pages and apps for accessibility (WCAG 2.1 AA) - semantic HTML, keyboard and screen-reader support, map list views, axe-core checks in Playwright tests, eslint-plugin-jsx-a11y, and how to handle a failing accessibility check. Use when creating or changing web UI, adding a map, writing end-to-end tests for a page, writing acceptance criteria for a user-facing feature, fixing an axe or jsx-a11y failure, or reviewing UI code for accessibility. | claude-code, gemini-cli, antigravity, github-copilot |
 <!-- catalog:end -->
+
+## City development standards
+
+The [`dev-standards`](skills/dev-standards/SKILL.md) skill holds the City's numbered engineering
+rules (git workflow, web accessibility, file formatting), each with an ID such as `GIT-010` and a
+level, **MUST** or **SHOULD**. Repositories install it like any other skill and add a
+one-line-per-rule digest to their `AGENTS.md`; see
+[docs/CONSUMING.md](docs/CONSUMING.md#city-development-standards). The reasoning behind each
+standard is in [docs/adr/](docs/adr/README.md).
 
 ## Contributing
 

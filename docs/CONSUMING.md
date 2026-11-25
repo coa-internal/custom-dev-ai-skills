@@ -103,6 +103,30 @@ diff: it should touch only `skills-lock.json` and the skill folders. Open a PR w
 bump the `verify-skills.yml@vX.Y.Z` ref in your caller workflow when the changelog says the workflow
 changed.
 
+## City development standards
+
+Install `dev-standards` with your other skills (add `--skill dev-standards` to the install command),
+then generate the standards digest in your `AGENTS.md`:
+
+```bash
+node .agents/skills/dev-standards/scripts/agents-digest.mjs
+```
+
+Commit the result. Re-run it after every upgrade. Add these to CI as required checks:
+
+```bash
+node .agents/skills/dev-standards/scripts/agents-digest.mjs --check
+node .agents/skills/dev-standards/scripts/check-formatting.mjs
+npx prettier --check .
+```
+
+Some rules ask each repository to make its own choice. For example, the City sets no default merge
+method: state yours in `AGENTS.md` and allow only that method in the repository's GitHub settings
+(GIT-007).
+
+To follow a SHOULD rule differently, record a project ADR that cites the rule ID and version. A MUST
+rule needs a waiver: open an issue here. See the skill's `references/deviations.md`.
+
 ## Repo-specific (local) skills
 
 You can add skills that only make sense in one repo, as long as the folder name starts with
