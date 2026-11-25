@@ -7,6 +7,9 @@
 // Exits 1 and lists each problem with its rule ID. This does not replace `prettier --check .`
 // (FMT-003); it checks that the configuration is the City's, so that check means the same thing in
 // every repository.
+//
+// Warnings do not change the exit code. Today there is one: the repository's package.json lists
+// Prettier with a range, tag or other non-exact version, which FMT-002 says SHOULD be pinned.
 import { readFile, stat } from 'node:fs/promises';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -34,8 +37,13 @@ const VENDORED = [
 	'skills-lock.json',
 ];
 
+const EXACT_VERSION = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
+const DEPENDENCY_FIELDS = ['devDependencies', 'dependencies', 'optionalDependencies'];
+
 const problems = [];
+const warnings = [];
 const fail = (rule, msg) => problems.push(`${rule}: ${msg}`);
+const warn = (rule, msg) => warnings.push(`${rule}: ${msg}`);
 const normalize = (s) => s.replace(/\r\n/g, '\n');
 
 async function readOrNull(path) {
@@ -99,6 +107,27 @@ async function checkPrettier() {
 	}
 }
 
+// FMT-002 (SHOULD): Prettier is pinned to an exact version in package.json. Only the root
+// package.json is read; a repository that declares Prettier elsewhere (for example in a workspace
+// package) is not warned.
+async function checkPrettierPin() {
+	let manifest;
+	try {
+		manifest = JSON.parse(await readFile('package.json', 'utf8'));
+	} catch {
+		return;
+	}
+	for (const field of DEPENDENCY_FIELDS) {
+		const spec = manifest[field]?.prettier;
+		if (typeof spec === 'string' && !EXACT_VERSION.test(spec)) {
+			warn(
+				'FMT-002',
+				`package.json ${field} lists prettier as "${spec}". Pin an exact version (for example "3.10.1") so every contributor and CI format identically.`,
+			);
+		}
+	}
+}
+
 async function exists(path) {
 	try {
 		await stat(path);
@@ -110,7 +139,13 @@ async function exists(path) {
 
 await checkEditorconfig();
 await checkPrettier();
+await checkPrettierPin();
 
+if (warnings.length > 0) {
+	console.warn(`Formatting standard: ${warnings.length} warning(s)\n`);
+	for (const w of warnings) console.warn(`  - ${w}`);
+	console.warn('');
+}
 if (problems.length > 0) {
 	console.error(`Formatting standard: ${problems.length} problem(s)\n`);
 	for (const p of problems) console.error(`  - ${p}`);

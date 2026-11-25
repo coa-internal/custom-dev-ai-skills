@@ -45,6 +45,12 @@ export default {
 };
 ```
 
+SHOULD: pin Prettier to an exact version in `package.json`, with no `^` or `~` range (3.10.1 at the
+time of writing), so every contributor and CI format identically. Upgrade it in a formatting-only
+pull request (FMT-007), because a new version can reformat existing files. The check script fails
+unless the major version is 3, and warns, without failing, when `package.json` lists Prettier with a
+range or tag instead of an exact version.
+
 ### FMT-003 (MUST) CI checks formatting and blocks merging
 
 CI runs `prettier --check .` as a required check, plus any formatter from FMT-005. It also runs this

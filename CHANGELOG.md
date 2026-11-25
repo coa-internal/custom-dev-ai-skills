@@ -15,6 +15,12 @@ for tag `vX.Y.Z`.
   that cites the `dev-standards` rules.
 - `docs/adr/`: ADRs 0001 to 0004 explaining the standards, and `docs/plans/standards-buildout.md`.
 
+### Changed
+- `dev-standards` FMT-002 (**minor**): new SHOULD to pin Prettier to an exact version (currently
+  3.10.1) and upgrade it in a formatting-only pull request (FMT-007). `check-formatting.mjs` warns
+  when `package.json` lists Prettier with a range or tag. The warning does not change the exit code,
+  and ADR 0004 is updated to match.
+
 ## [0.2.0] - 2026-11-23
 
 ### Added
