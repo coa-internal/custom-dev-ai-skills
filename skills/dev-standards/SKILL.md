@@ -81,7 +81,8 @@ Follow [references/formatting.md](references/formatting.md). In short:
 
 `scripts/check-formatting.mjs` confirms that `.editorconfig` starts with the baseline, that
 Prettier's effective options match the City base for each kind of file, and that vendored skill
-folders and `skills-lock.json` are ignored. It needs Prettier installed in the repository.
+folders and `skills-lock.json` are ignored. It also warns, without failing, when `package.json` does
+not pin Prettier to an exact version (FMT-002). It needs Prettier installed in the repository.
 
 ## Reminders
 

@@ -21,7 +21,9 @@ This repository currently has no formatter.
 
 - **One baseline for every City repository, including this one**: an `.editorconfig` that starts
   with the City block (FMT-001) and Prettier 3 with the City base options, which projects extend but
-  do not change (FMT-002). The baseline files ship in the `dev-standards` skill's `assets/`.
+  do not change (FMT-002). Prettier should be pinned to an exact version and upgraded in a
+  formatting-only pull request, because a new version can reformat existing files. The baseline
+  files ship in the `dev-standards` skill's `assets/`.
 - **CI enforces it** (FMT-003). The skill's `scripts/check-formatting.mjs` confirms that a
   repository's configuration is the City's, so `prettier --check` means the same thing everywhere.
 - **Vendored and generated content is never reformatted** (FMT-004). Installed skills and lockfiles
