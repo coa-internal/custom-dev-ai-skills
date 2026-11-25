@@ -1,0 +1,22 @@
+{
+	"useTabs": true,
+	"tabWidth": 2,
+	"printWidth": 100,
+	"singleQuote": true,
+	"jsxSingleQuote": false,
+	"semi": true,
+	"overrides": [
+		{
+			"files": "*.md",
+			"options": { "proseWrap": "always" }
+		},
+		{
+			"files": "SKILL.md",
+			"options": { "embeddedLanguageFormatting": "off" }
+		},
+		{
+			"files": ["*.yml", "*.yaml"],
+			"options": { "useTabs": false }
+		}
+	]
+}
